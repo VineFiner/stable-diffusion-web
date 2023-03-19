@@ -1,0 +1,26 @@
+name: Serverless Devs Project CI/CD
+
+on:
+  # push:
+  #   branches: [main]
+  # 允许您从“操作”选项卡手动运行此工作流程
+  workflow_dispatch:
+
+jobs:
+  serverless-devs-cd:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 12
+          registry-url: https://registry.npmjs.org/
+      - run: npm install
+      - run: npm install -g @serverless-devs/s
+      - run: s config add --AccessKeyID ${{secrets.AccessKeyID}} --AccessKeySecret ${{secrets.AccessKeySecret}} -a fc-access -f
+      # 这里是部署
+      - name: deploy
+        run: |
+          export imageurl="${{ secrets.REPOSITORY }}:$(date +%F-%H-%M-%S)"
+          s deploy -t ./s.yaml -a fc-access --use-local -y
+#END
