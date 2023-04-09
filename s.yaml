@@ -38,7 +38,7 @@ services:
         timeout: 1200
         memorySize: 128
         cpu: 0.1
-        diskSize: 512
+        diskSize: 10240
         instanceConcurrency: 1
         handler: index.handler
   fc-gpu: # 业务名称/模块名称
@@ -90,16 +90,34 @@ services:
               - PUT
               - DELETE
               - OPTIONS
-      customDomains:
-        - domainName: auto
-          protocol: HTTP
-          routeConfigs:
-            - path: /*
-              methods:
-                - GET
-                - POST
-                - HEAD
-                - PUT
-                - DELETE
-                - OPTIONS
-# END
+
+  keep-warm: # 辅助函数, 2 min 定时预热
+    component: fc # 组件名称
+    actions:
+      post-deploy:
+        - component: fc invoke
+    props: # 组件的属性值
+      region: ${vars.region}
+      service: ${vars.service}
+      function:
+        name: keep-warm
+        description: 'Serverless Devs Web Framework Helper Function'
+        codeUri: './code/keep-warm'
+        handler: index.handler
+        runtime: python3
+        timeout: 120
+        memorySize: 128
+        cpu: 0.1
+        diskSize: 512
+        instanceConcurrency: 1
+        environmentVariables:
+          KEEP_WARM_URL: ${fc-gpu.output.url.system_url}/healthcheck
+      triggers:
+        - name: timerTrigger
+          type: timer
+          # qualifier: LATEST    
+          config:
+            payload: '{}'
+            cronExpression: '@every 2m'
+            enable: false
+#END
