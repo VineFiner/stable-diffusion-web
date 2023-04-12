@@ -17,6 +17,19 @@ vars: # 全局变量
           bucketPath: '/stable-diffusion-web/data'
           mountDir: /data
           readOnly: false
+        # 模型
+        - bucketName: "fc-vine"
+          endpoint: "http://oss-${vars.region}-internal.aliyuncs.com"
+          bucketPath: '/stable-diffusion-web/models'
+          mountDir: /stable-diffusion-webui/models
+          readOnly: false
+        # 扩展
+        - bucketName: "fc-vine"
+          endpoint: "http://oss-${vars.region}-internal.aliyuncs.com"
+          bucketPath: '/stable-diffusion-web/extensions'
+          mountDir: /stable-diffusion-webui/extensions
+          readOnly: false
+        # 输出
         - bucketName: "fc-vine"
           endpoint: "http://oss-${vars.region}-internal.aliyuncs.com"
           bucketPath: '/stable-diffusion-web/output'
@@ -38,7 +51,7 @@ services:
         timeout: 1200
         memorySize: 128
         cpu: 0.1
-        diskSize: 10240
+        diskSize: 512
         instanceConcurrency: 1
         handler: index.handler
   fc-gpu: # 业务名称/模块名称
@@ -65,10 +78,10 @@ services:
         name: ${vars.functionName}
         description: "This is an API that detects the GPU instance environment"
         caPort: 9000
-        cpu: 2
-        memorySize: 8192
-        diskSize: 512
-        gpuMemorySize: 4096
+        cpu: 8
+        memorySize: 16384
+        diskSize: 10240
+        gpuMemorySize: 16384
         instanceType: g1
         timeout: 300
         instanceConcurrency: 100
